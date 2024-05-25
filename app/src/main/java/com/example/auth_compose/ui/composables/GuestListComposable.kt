@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -22,7 +23,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,7 +82,9 @@ fun GuestListContent() {
 @Composable
 fun GuestList(focusManager: FocusManager) {
     var name by remember { mutableStateOf("") }
-    val names = remember { mutableStateOf(listOf<String>()) }
+    var names by remember { mutableStateOf(listOf<String>()) }
+
+    val listState = rememberLazyListState()
 
     Row(
         verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 24.dp)
@@ -97,7 +99,7 @@ fun GuestList(focusManager: FocusManager) {
         Button(
             onClick = {
                 if (name.isNotBlank()) {
-                    names.value += name
+                    names += name
                     name = ""
                     focusManager.clearFocus()
                 }
@@ -108,8 +110,10 @@ fun GuestList(focusManager: FocusManager) {
     }
     Spacer(modifier = Modifier.height(24.dp))
     LazyColumn {
-        items(names.value) { name ->
-            GuestItem(focusManager, name, names)
+        items(names) { name ->
+            GuestItem(focusManager, name, names, onRemoveGuest = {
+                names = names.filter { it != name }
+            })
         }
     }
 }
@@ -118,9 +122,10 @@ fun GuestList(focusManager: FocusManager) {
 fun GuestItem(
     focusManager: FocusManager,
     name: String,
-    names: MutableState<List<String>>,
+    names: List<String>,
+    onRemoveGuest: () -> Unit,
 ) {
-    if (name == names.value.first()) Divider()
+    if (name == names.first()) Divider()
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -138,7 +143,7 @@ fun GuestItem(
         Spacer(modifier = Modifier.weight(1f))
         Button(
             onClick = {
-                names.value = names.value.filter { it != name }
+                onRemoveGuest()
                 focusManager.clearFocus()
             },
         ) {
