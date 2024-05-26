@@ -19,5 +19,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "auth-compose"
+rootProject.name = "compose-basics"
 include(":app")
