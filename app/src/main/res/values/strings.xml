@@ -1,6 +1,8 @@
 <resources>
     <!--  App related  -->
     <string name="app_name">compose-basics</string>
+
+    <!--  Birthday card  -->
     <string name="happy_birthday_card_title">Happy Birthday Sam!</string>
     <string name="happy_birthday_card_from_text">From Emma</string>
 
