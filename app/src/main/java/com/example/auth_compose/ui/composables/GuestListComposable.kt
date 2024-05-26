@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -81,26 +82,27 @@ fun GuestListContent() {
 
 @Composable
 fun GuestList(focusManager: FocusManager) {
-    var name by remember { mutableStateOf("") }
-    var names by remember { mutableStateOf(listOf<String>()) }
-
-    val listState = rememberLazyListState()
+    var guestToAddName by remember { mutableStateOf("") }
+    var guests by remember { mutableStateOf(listOf<Guest>()) }
 
     Row(
         verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 24.dp)
     ) {
         OutlinedTextField(
-            value = name,
-            onValueChange = { newValue -> name = newValue },
+            value = guestToAddName,
+            onValueChange = { newValue -> guestToAddName = newValue },
             label = { Text("Name") },
             modifier = Modifier.weight(1f)
         )
         Spacer(modifier = Modifier.width(16.dp))
         Button(
             onClick = {
-                if (name.isNotBlank()) {
-                    names += name
-                    name = ""
+                if (guestToAddName.isNotBlank()) {
+                    val lastGuestId = guests.lastOrNull()?.id ?: 0
+
+                    guests += Guest(id = lastGuestId + 1, name = guestToAddName)
+                    guestToAddName = ""
+
                     focusManager.clearFocus()
                 }
             },
@@ -110,10 +112,15 @@ fun GuestList(focusManager: FocusManager) {
     }
     Spacer(modifier = Modifier.height(24.dp))
     LazyColumn {
-        items(names) { name ->
-            GuestItem(focusManager, name, names, onRemoveGuest = {
-                names = names.filter { it != name }
-            })
+        items(guests, key = { guest -> guest.id }) { guestItem ->
+            GuestItem(
+                focusManager,
+                guestName = guestItem.name,
+                isFirstGuest = guestItem.name == guests.firstOrNull()?.name,
+                onRemoveGuest = {
+                    guests = guests.filter { it.name != guestItem.name }
+                },
+            )
         }
     }
 }
@@ -121,11 +128,11 @@ fun GuestList(focusManager: FocusManager) {
 @Composable
 fun GuestItem(
     focusManager: FocusManager,
-    name: String,
-    names: List<String>,
+    guestName: String,
+    isFirstGuest: Boolean,
     onRemoveGuest: () -> Unit,
 ) {
-    if (name == names.first()) Divider()
+    if (isFirstGuest) Divider()
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
@@ -135,7 +142,7 @@ fun GuestItem(
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
-            name,
+            guestName,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .padding(16.dp)
@@ -152,3 +159,8 @@ fun GuestItem(
     }
     Divider()
 }
+
+data class Guest(
+    val id: Long,
+    val name: String,
+)
