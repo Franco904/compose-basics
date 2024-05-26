@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">auth-compose</string>
+    <string name="happy_birthday_card_title">Happy Birthday Sam!</string>
+    <string name="happy_birthday_card_from_text">From Emma</string>
 </resources>
