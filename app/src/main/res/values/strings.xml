@@ -14,4 +14,14 @@
     <!--  To-do all done  -->
     <string name="todo_all_done_title">All tasks completed</string>
     <string name="todo_all_done_message">Nice work!</string>
+
+    <!--  Purple quadrants  -->
+    <string name="first_quadrant_title">Text composable</string>
+    <string name="first_quadrant_message">Displays text and follows the recommended Material Design guidelines.</string>
+    <string name="second_quadrant_title">Image composable</string>
+    <string name="second_quadrant_message">Creates a composable that lays out and draws a given Painter class object.</string>
+    <string name="third_quadrant_title">Row composable</string>
+    <string name="third_quadrant_message">A layout composable that places its children in a horizontal sequence.</string>
+    <string name="fourth_quadrant_title">Column composable</string>
+    <string name="fourth_quadrant_message">A layout composable that places its children in a vertical sequence.</string>
 </resources>

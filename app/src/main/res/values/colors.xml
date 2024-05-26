@@ -7,4 +7,10 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Compose quadrant -->
+    <color name="purple_1st_quadrant">#FFEADDFF</color>
+    <color name="purple_2nd_quadrant">#FFD0BCFF</color>
+    <color name="purple_3rd_quadrant">#FFB69DF8</color>
+    <color name="purple_4th_quadrant">#FFF6EDFF</color>
 </resources>
