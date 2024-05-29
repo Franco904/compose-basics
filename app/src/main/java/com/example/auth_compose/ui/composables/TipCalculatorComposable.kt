@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CutCornerShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -159,6 +161,7 @@ fun StandardTextField(
             unfocusedIndicatorColor = colorResource(id = R.color.brown_field),
             focusedIndicatorColor = colorResource(id = R.color.red_dark_field),
         ),
+        shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
         modifier = modifier.fillMaxWidth()
     )
 }
