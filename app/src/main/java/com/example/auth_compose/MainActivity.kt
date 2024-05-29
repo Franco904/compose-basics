@@ -4,11 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.res.stringResource
-import com.example.auth_compose.ui.composables.BirthdayCardComposable
-import com.example.auth_compose.ui.composables.ComposeArticleComposable
-import com.example.auth_compose.ui.composables.PurpleQuadrantsComposable
-import com.example.auth_compose.ui.composables.TodoAllDoneComposable
+import com.example.auth_compose.ui.composables.TipCalculatorComposable
 import com.example.auth_compose.ui.theme.AuthcomposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -24,6 +20,6 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppContent() {
-    PurpleQuadrantsComposable()
+    TipCalculatorComposable()
 }
 

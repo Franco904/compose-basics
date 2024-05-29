@@ -24,4 +24,11 @@
     <string name="third_quadrant_message">A layout composable that places its children in a horizontal sequence.</string>
     <string name="fourth_quadrant_title">Column composable</string>
     <string name="fourth_quadrant_message">A layout composable that places its children in a vertical sequence.</string>
+
+    <!--  Tip calculator  -->
+    <string name="calculate_tip">Calculate Tip</string>
+    <string name="bill_amount">Bill Amount</string>
+    <string name="tip_percentage">Tip Percentage</string>
+    <string name="round_up_tip">Round up tip?</string>
+    <string name="tip_amount">Tip Amount: $ %s</string>
 </resources>

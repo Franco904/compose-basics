@@ -13,4 +13,9 @@
     <color name="purple_2nd_quadrant">#FFD0BCFF</color>
     <color name="purple_3rd_quadrant">#FFB69DF8</color>
     <color name="purple_4th_quadrant">#FFF6EDFF</color>
+
+    <!-- Compose quadrant -->
+    <color name="red_light_field">#FFF1DDE2</color>
+    <color name="red_dark_field">#FF984061</color>
+    <color name="brown_field">#FF514347</color>
 </resources>
