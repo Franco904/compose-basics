@@ -1,6 +1,7 @@
 package com.example.auth_compose.ui.composables
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -28,6 +30,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -48,11 +53,15 @@ fun TipCalculatorComposable() {
 
     var mustRoundTip by remember { mutableStateOf(false) }
 
+    val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
 
     Surface(
         modifier = Modifier
             .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures { focusManager.clearFocus() }
+            }
             .verticalScroll(scrollState)
             .padding(36.dp)
     ) {
@@ -69,6 +78,7 @@ fun TipCalculatorComposable() {
                 },
                 leadingIcon = R.drawable.baseline_money_24,
                 label = stringResource(R.string.bill_amount),
+                focusManager = focusManager,
             )
             Spacer(modifier = Modifier.height(28.dp))
             StandardTextField(
@@ -79,6 +89,8 @@ fun TipCalculatorComposable() {
                 },
                 leadingIcon = R.drawable.baseline_percent_24,
                 label = stringResource(R.string.tip_percentage),
+                focusManager = focusManager,
+                imeAction = ImeAction.Done,
             )
             Spacer(modifier = Modifier.height(28.dp))
             RoundTheTipRow(
@@ -131,6 +143,7 @@ fun StandardTextField(
     onValueChange: (String) -> Unit,
     @DrawableRes leadingIcon: Int,
     label: String,
+    focusManager: FocusManager,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Number,
     imeAction: ImeAction = ImeAction.Next,
@@ -149,6 +162,11 @@ fun StandardTextField(
             keyboardType = keyboardType,
             imeAction = imeAction,
         ),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                focusManager.clearFocus()
+            }
+        ),
         singleLine = true,
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = colorResource(id = R.color.red_light_field),
@@ -162,6 +180,7 @@ fun StandardTextField(
             focusedIndicatorColor = colorResource(id = R.color.red_dark_field),
         ),
         shape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp),
+
         modifier = modifier.fillMaxWidth()
     )
 }
