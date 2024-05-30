@@ -1,5 +1,6 @@
 package com.example.auth_compose.ui.util
 
+import com.example.auth_compose.testUtils.faker
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -36,7 +37,7 @@ class CalculationsTest {
             val tipAmount = calculateTip(
                 billAmount = "wegqegadea",
                 tipPercentage = "26.3",
-                mustRoundTip = true,
+                mustRoundTip = faker.random.nextBoolean(),
             )
 
             tipAmount.shouldBeEqualTo("")
@@ -47,7 +48,7 @@ class CalculationsTest {
             val tipAmount = calculateTip(
                 billAmount = "123",
                 tipPercentage = "wrgwargawRg",
-                mustRoundTip = true,
+                mustRoundTip = faker.random.nextBoolean(),
             )
 
             tipAmount.shouldBeEqualTo("")
