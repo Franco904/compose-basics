@@ -1,6 +1,7 @@
 package com.example.auth_compose.ui.composables
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -45,7 +46,7 @@ import com.example.auth_compose.ui.theme.AuthcomposeTheme
 import com.example.auth_compose.ui.util.calculateTip
 
 @Composable
-fun TipCalculatorComposable() {
+fun TipCalculatorComposable(modifier: Modifier = Modifier) {
     var billAmount by remember { mutableStateOf("") }
     var tipPercentage by remember { mutableStateOf("") }
     var tipAmount by remember { mutableStateOf("") }
@@ -56,7 +57,7 @@ fun TipCalculatorComposable() {
     val scrollState = rememberScrollState()
 
     Surface(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .pointerInput(Unit) {
                 detectTapGestures { focusManager.clearFocus() }
