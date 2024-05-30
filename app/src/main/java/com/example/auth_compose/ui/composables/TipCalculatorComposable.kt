@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -47,11 +48,11 @@ import com.example.auth_compose.ui.util.calculateTip
 
 @Composable
 fun TipCalculatorComposable(modifier: Modifier = Modifier) {
-    var billAmount by remember { mutableStateOf("") }
-    var tipPercentage by remember { mutableStateOf("") }
-    var tipAmount by remember { mutableStateOf("") }
+    var billAmount by rememberSaveable { mutableStateOf("") }
+    var tipPercentage by rememberSaveable { mutableStateOf("") }
+    var tipAmount by rememberSaveable { mutableStateOf("") }
 
-    var mustRoundTip by remember { mutableStateOf(false) }
+    var mustRoundTip by rememberSaveable { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
     val scrollState = rememberScrollState()
