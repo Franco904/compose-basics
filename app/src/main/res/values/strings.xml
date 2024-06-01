@@ -31,4 +31,8 @@
     <string name="tip_percentage">Tip Percentage</string>
     <string name="round_up_tip">Round up tip?</string>
     <string name="tip_amount">Tip Amount: $ %s</string>
+
+    <!-- Artwork showcase -->
+    <string name="previous_button_text">Previous</string>
+    <string name="next_button_text">Next</string>
 </resources>
