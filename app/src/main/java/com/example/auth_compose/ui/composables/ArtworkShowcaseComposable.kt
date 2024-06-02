@@ -45,11 +45,6 @@ import kotlinx.parcelize.Parcelize
 
 @Composable
 fun ArtworkShowcaseComposable() {
-    val artworks = getArtworks()
-    var currentArtwork by rememberSaveable {
-        mutableStateOf(artworks.first())
-    }
-
     val scrollState = rememberScrollState()
 
     Column(
@@ -59,6 +54,11 @@ fun ArtworkShowcaseComposable() {
             .fillMaxSize()
             .verticalScroll(scrollState)
     ) {
+        val artworks = getArtworks()
+        var currentArtwork by rememberSaveable {
+            mutableStateOf(artworks.first())
+        }
+
         ArtworkPictureRow(picture = currentArtwork.picture)
         Spacer(modifier = Modifier.height(8.dp))
         AboutArtworkRow(
