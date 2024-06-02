@@ -4,8 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.Composable
-import com.example.auth_compose.ui.composables.ArtworkShowcaseComposable
-import com.example.auth_compose.ui.composables.TipCalculatorComposable
+import com.example.auth_compose.ui.composables.CourseTopicsGridComposable
 import com.example.auth_compose.ui.theme.AuthcomposeTheme
 
 class MainActivity : ComponentActivity() {
@@ -21,6 +20,5 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppContent() {
-    ArtworkShowcaseComposable()
+    CourseTopicsGridComposable()
 }
-
