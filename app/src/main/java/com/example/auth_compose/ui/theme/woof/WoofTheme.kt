@@ -285,6 +285,7 @@ fun WoofTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
+        shapes = Shapes,
         typography = AppTypography,
         content = content
     )
