@@ -22,6 +22,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,6 +42,9 @@ import com.example.auth_compose.R
 import com.example.auth_compose.ui.theme.AuthcomposeTheme
 import com.example.auth_compose.ui.util.style
 import com.example.auth_compose.ui.util.textSpan
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.parcelize.Parcelize
 
 @Composable
@@ -143,7 +147,7 @@ fun AboutArtworkRow(
 
 @Composable
 fun TogglePictureRow(
-    artworks: List<Artwork>,
+    artworks: ImmutableList<Artwork>,
     currentArtwork: Artwork,
     onPreviousPicturePressed: (Int) -> Unit,
     onNextPicturePressed: (Int) -> Unit,
@@ -183,7 +187,7 @@ fun ArtworkShowcasePreview() {
 }
 
 // Source: https://www.nationalgallery.org.uk/paintings/learn-about-art/guide-to-impressionism
-fun getArtworks() = listOf(
+fun getArtworks() = persistentListOf(
     Artwork(
         picture = R.drawable.renoir_at_the_theatre,
         name = "At the Theatre (La Première Sortie)",

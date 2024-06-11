@@ -11,8 +11,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material3.Divider
+import androidx.compose.material.icons.automirrored.filled.List
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -71,9 +71,9 @@ fun ImageContentLayout() {
 fun ListItemsLayout() {
     Column {
         LazyRow {
-            items(10) { i ->
+            items(10) { _ ->
                 Icon(
-                    imageVector = Icons.Default.List,
+                    imageVector = Icons.AutoMirrored.Filled.List,
                     contentDescription = null,
                     modifier = Modifier
                         .size(100.dp)
@@ -81,11 +81,11 @@ fun ListItemsLayout() {
                 )
             }
         }
-        Divider()
+        HorizontalDivider()
         LazyColumn {
-            items(10) { i ->
+            items(10) { _ ->
                 Icon(
-                    imageVector = Icons.Default.List,
+                    imageVector = Icons.AutoMirrored.Filled.List,
                     contentDescription = null,
                     modifier = Modifier.size(100.dp)
                 )

@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.auth_compose.R
 import com.example.auth_compose.ui.theme.AuthcomposeTheme
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.parcelize.Parcelize
 
 @Composable
@@ -110,7 +111,7 @@ fun CourseTopicsGridPreview() {
     }
 }
 
-fun getCourseTopics() = listOf(
+fun getCourseTopics() = persistentListOf(
     CourseTopic(1L, R.drawable.architecture, R.string.architecture, 58),
     CourseTopic(2L, R.drawable.crafts, R.string.crafts, 121),
     CourseTopic(3L, R.drawable.business, R.string.business, 78),
