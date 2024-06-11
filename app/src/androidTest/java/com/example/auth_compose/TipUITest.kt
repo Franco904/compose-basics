@@ -2,14 +2,11 @@ package com.example.auth_compose
 
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.example.auth_compose.ui.composables.TipCalculatorComposable
-import com.example.auth_compose.ui.theme.AuthcomposeTheme
 import org.junit.Rule
-
 import org.junit.Test
 import org.junit.runner.RunWith
 
