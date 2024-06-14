@@ -75,18 +75,20 @@ fun GuestListComposable() {
                     bottom = 24.dp,
                 )
         ) {
-            GuestList(focusManager)
+            GuestList { focusManager }
         }
     }
 }
 
 @Composable
-fun GuestList(focusManager: FocusManager) {
+fun GuestList(focusManager: () -> FocusManager) {
     var guestToAddName by remember { mutableStateOf("") }
     var guests by remember { mutableStateOf(listOf<Guest>()) }
 
     Row(
-        verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(bottom = 24.dp)
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(bottom = 24.dp),
     ) {
         OutlinedTextField(
             value = guestToAddName,
@@ -103,9 +105,11 @@ fun GuestList(focusManager: FocusManager) {
                     guests += Guest(id = lastGuestId + 1, name = guestToAddName)
                     guestToAddName = ""
 
-                    focusManager.clearFocus()
+                    focusManager().clearFocus()
                 }
             },
+            modifier = Modifier
+                .padding(top = 6.dp)
         ) {
             Text("Add")
         }
@@ -114,7 +118,7 @@ fun GuestList(focusManager: FocusManager) {
     LazyColumn {
         items(guests, key = { guest -> guest.id }) { guestItem ->
             GuestItem(
-                focusManager,
+                focusManager = focusManager,
                 guestName = guestItem.name,
                 isFirstGuest = guestItem.name == guests.firstOrNull()?.name,
                 onRemoveGuest = {
@@ -127,7 +131,7 @@ fun GuestList(focusManager: FocusManager) {
 
 @Composable
 fun GuestItem(
-    focusManager: FocusManager,
+    focusManager: () -> FocusManager,
     guestName: String,
     isFirstGuest: Boolean,
     onRemoveGuest: () -> Unit,
@@ -151,7 +155,7 @@ fun GuestItem(
         Button(
             onClick = {
                 onRemoveGuest()
-                focusManager.clearFocus()
+                focusManager().clearFocus()
             },
         ) {
             Text("Remove")

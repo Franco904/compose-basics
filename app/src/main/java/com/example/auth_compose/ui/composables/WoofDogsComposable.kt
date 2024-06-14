@@ -47,6 +47,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.auth_compose.R
 import com.example.auth_compose.ui.theme.woof.WoofTheme
+import com.example.auth_compose.ui.theme.woof.animation
 
 @Composable
 fun WoofDogsComposable(modifier: Modifier = Modifier) {
@@ -115,12 +116,7 @@ fun DogCard(
         shape = MaterialTheme.shapes.medium,
         modifier = modifier
             .clickable { isExpanded = !isExpanded }
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioNoBouncy,
-                    stiffness = Spring.StiffnessMedium,
-                )
-            )
+            .animateContentSize(animationSpec = MaterialTheme.animation.mediumSlowNoBouncy)
     ) {
         Column {
             Row(
