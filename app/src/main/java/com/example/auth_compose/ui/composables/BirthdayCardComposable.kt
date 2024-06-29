@@ -21,7 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.auth_compose.R
-import com.example.auth_compose.ui.composables.theme.AuthcomposeTheme
+import com.example.auth_compose.ui.composables.theme.ComposeBasicsTheme
 import com.example.auth_compose.ui.composables.theme.Purple80
 
 @Composable
@@ -82,7 +82,7 @@ fun GreetingText(
 @Preview(showBackground = true)
 @Composable
 fun BirthdayCardPreview() {
-    AuthcomposeTheme {
+    ComposeBasicsTheme {
         BirthdayCardComposable(
             message = stringResource(R.string.happy_birthday_card_title),
             from = stringResource(R.string.happy_birthday_card_from_text),
