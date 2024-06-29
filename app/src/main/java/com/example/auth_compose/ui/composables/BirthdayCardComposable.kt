@@ -21,8 +21,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.auth_compose.R
-import com.example.auth_compose.ui.theme.AuthcomposeTheme
-import com.example.auth_compose.ui.theme.Purple80
+import com.example.auth_compose.ui.composables.theme.AuthcomposeTheme
+import com.example.auth_compose.ui.composables.theme.Purple80
 
 @Composable
 fun BirthdayCardComposable(

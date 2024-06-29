@@ -1,4 +1,4 @@
-package com.example.auth_compose.ui.theme
+package com.example.auth_compose.ui.composables.theme
 
 import androidx.compose.ui.graphics.Color
 

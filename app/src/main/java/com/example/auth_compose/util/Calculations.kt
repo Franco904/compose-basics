@@ -1,4 +1,4 @@
-package com.example.auth_compose.ui.util
+package com.example.auth_compose.util
 
 fun calculateTip(
     billAmount: String,

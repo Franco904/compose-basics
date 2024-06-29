@@ -1,6 +1,7 @@
 package com.example.auth_compose.ui.util
 
 import com.example.auth_compose.testUtils.faker
+import com.example.auth_compose.util.calculateTip
 import org.amshove.kluent.shouldBeEqualTo
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested

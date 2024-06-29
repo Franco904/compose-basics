@@ -37,7 +37,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.auth_compose.R
-import com.example.auth_compose.ui.theme.AuthcomposeTheme
+import com.example.auth_compose.ui.composables.theme.AuthcomposeTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

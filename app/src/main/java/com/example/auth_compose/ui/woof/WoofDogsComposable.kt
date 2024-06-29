@@ -1,4 +1,4 @@
-package com.example.auth_compose.ui.composables
+package com.example.auth_compose.ui.woof
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
@@ -44,8 +44,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.auth_compose.R
-import com.example.auth_compose.ui.theme.woof.WoofTheme
-import com.example.auth_compose.ui.theme.woof.animation
+import com.example.auth_compose.ui.woof.theme.WoofTheme
+import com.example.auth_compose.ui.woof.theme.animation
 
 @Composable
 fun WoofDogsComposable(modifier: Modifier = Modifier) {

@@ -38,9 +38,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.auth_compose.R
-import com.example.auth_compose.ui.theme.AuthcomposeTheme
-import com.example.auth_compose.ui.util.style
-import com.example.auth_compose.ui.util.textSpan
+import com.example.auth_compose.ui.composables.theme.AuthcomposeTheme
+import com.example.auth_compose.util.style
+import com.example.auth_compose.util.textSpan
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.parcelize.Parcelize

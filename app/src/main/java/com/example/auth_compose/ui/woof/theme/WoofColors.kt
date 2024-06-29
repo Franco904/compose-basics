@@ -1,4 +1,4 @@
-package com.example.auth_compose.ui.theme.woof
+package com.example.auth_compose.ui.woof.theme
 
 import androidx.compose.ui.graphics.Color
 

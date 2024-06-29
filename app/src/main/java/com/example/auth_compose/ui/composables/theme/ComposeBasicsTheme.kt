@@ -1,4 +1,4 @@
-package com.example.auth_compose.ui.theme
+package com.example.auth_compose.ui.composables.theme
 
 import android.app.Activity
 import android.os.Build
@@ -38,7 +38,7 @@ onSurface = Color(0xFF1C1B1F),
 )
 
 @Composable
-fun AuthcomposeTheme(
+fun ComposeBasicsTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
