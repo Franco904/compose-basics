@@ -75,9 +75,10 @@ dependencies {
 
     implementation(libs.kotlin.collections.immutable)
 
+    implementation(libs.faker)
+
     testImplementation(libs.junit.api)
     testRuntimeOnly(libs.junit.engine)
-    testImplementation(libs.faker)
     testImplementation(libs.kluent)
 
     androidTestImplementation(libs.androidx.junit)
