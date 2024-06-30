@@ -146,10 +146,11 @@ fun UnscrambleGameScreen(modifier: Modifier = Modifier) {
             .verticalScroll(rememberScrollState())
     ) {
         AnimatedVisibility(gameState == GameState.STARTED) {
-            GameScoreAndTopic(
-                topic = topic,
-                totalScore = totalScore.toString(),
-            )
+            Row {
+                GameTotalScore(totalScore = totalScore.toString())
+                Spacer(modifier = Modifier.weight(1f))
+                GameTopic(topic = topic)
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
         GameMainPanel {
@@ -291,42 +292,45 @@ fun UnscrambleGameScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun GameScoreAndTopic(
-    topic: String,
+private fun GameTotalScore(
     totalScore: String,
     modifier: Modifier = Modifier,
 ) {
-    Row(
-        modifier = modifier,
-    ) {
-        Text(
-            text = buildAnnotatedString {
-                textSpan("Score: ")
-                textSpan(
-                    totalScore.style(
-                        SpanStyle(
-                            fontWeight = FontWeight.Medium,
-                            letterSpacing = 0.5.sp,
-                        )
+    Text(
+        text = buildAnnotatedString {
+            textSpan("Score: ")
+            textSpan(
+                totalScore.style(
+                    SpanStyle(
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.5.sp,
                     )
                 )
-            },
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Text(
-            text = buildAnnotatedString {
-                textSpan("Topic: ")
-                textSpan(
-                    topic.style(
-                        SpanStyle(
-                            fontWeight = FontWeight.Medium,
-                            letterSpacing = 0.5.sp,
-                        )
+            )
+        },
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun GameTopic(
+    topic: String,
+    modifier: Modifier = Modifier,
+) {
+    Text(
+        text = buildAnnotatedString {
+            textSpan("Topic: ")
+            textSpan(
+                topic.style(
+                    SpanStyle(
+                        fontWeight = FontWeight.Medium,
+                        letterSpacing = 0.5.sp,
                     )
                 )
-            },
-        )
-    }
+            )
+        },
+        modifier = modifier
+    )
 }
 
 @Composable
@@ -380,7 +384,7 @@ private fun GameStartedPanel(
             .padding(16.dp)
     ) {
         Badge(
-            
+
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier
@@ -406,38 +410,55 @@ private fun GameStartedPanel(
                 .align(Alignment.CenterHorizontally),
         )
         Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = guess,
-            onValueChange = onGuessChanged,
-            keyboardActions = KeyboardActions(
-                onDone = onGuessInputDone,
-            ),
-            keyboardOptions = KeyboardOptions.Default.copy(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Done,
-            ),
-            isError = isGuessInvalid,
-            placeholder = { Text(text = "Your guess") },
-            colors = TextFieldDefaults.colors(
-                focusedContainerColor = MaterialTheme.colorScheme.background,
-                unfocusedContainerColor = MaterialTheme.colorScheme.background,
-                errorContainerColor = MaterialTheme.colorScheme.background,
-                errorCursorColor = MaterialTheme.colorScheme.error,
-            ),
-            supportingText = {
-                AnimatedVisibility(isGuessInvalid) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = "Input your guess before submit",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall,
-                    )
-                }
-            },
-            shape = MaterialTheme.shapes.medium,
-            singleLine = true,
+        GameGuessTextField(
+            guess = guess,
+            isGuessInvalid = isGuessInvalid,
+            onGuessChanged = onGuessChanged,
+            onGuessInputDone = onGuessInputDone,
         )
     }
+}
+
+@Composable
+private fun GameGuessTextField(
+    guess: String,
+    isGuessInvalid: Boolean,
+    onGuessChanged: (String) -> Unit,
+    onGuessInputDone: KeyboardActionScope.() -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    OutlinedTextField(
+        value = guess,
+        onValueChange = onGuessChanged,
+        keyboardActions = KeyboardActions(
+            onDone = onGuessInputDone,
+        ),
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done,
+        ),
+        isError = isGuessInvalid,
+        placeholder = { Text(text = "Your guess") },
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = MaterialTheme.colorScheme.background,
+            unfocusedContainerColor = MaterialTheme.colorScheme.background,
+            errorContainerColor = MaterialTheme.colorScheme.background,
+            errorCursorColor = MaterialTheme.colorScheme.error,
+        ),
+        supportingText = {
+            AnimatedVisibility(isGuessInvalid) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Input your guess before submit",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+        },
+        shape = MaterialTheme.shapes.medium,
+        singleLine = true,
+        modifier = modifier
+    )
 }
 
 @Composable
