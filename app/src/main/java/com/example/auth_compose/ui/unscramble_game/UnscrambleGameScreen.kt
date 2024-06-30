@@ -6,6 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,6 +29,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,19 +43,23 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.auth_compose.ui.unscramble_game.theme.UnscrambleGameTheme
 import com.example.auth_compose.util.faker
+import com.example.auth_compose.util.scramble
 import com.example.auth_compose.util.style
 import com.example.auth_compose.util.textSpan
-import kotlinx.collections.immutable.PersistentList
+import com.example.auth_compose.util.toTitleCase
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
+import java.util.Locale
 
 @Composable
 fun UnscrambleGameScreen(modifier: Modifier = Modifier) {
@@ -61,28 +68,69 @@ fun UnscrambleGameScreen(modifier: Modifier = Modifier) {
     var totalScore by remember { mutableIntStateOf(0) }
     var round by remember { mutableIntStateOf(1) }
 
-    val topicToWords by remember { mutableStateOf(mapOf(
-        "App names" to List(10) { faker.app.name() }.toPersistentList(),
-        "Adjectives" to List(10) { faker.adjective.positive() }.toPersistentList(),
-        "Animal names" to List(10) { faker.animal.name() }.toPersistentList(),
-        "Beer brands" to List(10) { faker.beer.brand() }.toPersistentList(),
-        "Bird adjectives" to List(10) { faker.bird.emotionalAdjectives() }.toPersistentList(),
-        "Color names" to List(10) { faker.color.name() }.toPersistentList(),
-        "Harry Potter spells" to List(10) { faker.harryPotter.spells() }.toPersistentList(),
-        "Sport names" to List(10) { faker.sport.summerOlympics() }.toPersistentList(),
-        "Minecraft mobs" to List(10) { faker.minecraft.mobs() }.toPersistentList(),
-        "Vehicle fuels" to List(10) { faker.vehicle.fuelTypes() }.toPersistentList(),
-        )) }
+    val topicToWords by remember {
+        mutableStateOf(
+            mapOf(
+                "Adjectives" to List(10) { faker.adjective.positive() }.toSet().toMutableList()
+                    .apply {
+                        while (size != 10) {
+                            faker.adjective.positive().let { if (it !in this) add(it) }
+                        }
+                    }.map { it.toTitleCase() }.toPersistentList(),
+                "Animal names" to List(10) { faker.animal.name() }.toSet().toMutableList()
+                    .apply {
+                        while (size != 10) {
+                            faker.animal.name().let { if (it !in this) add(it) }
+                        }
+                    }.map { it.toTitleCase() }.toPersistentList(),
+                "Basketball teams" to List(10) { faker.basketball.teams() }.toSet().toMutableList()
+                    .apply {
+                        while (size != 10) {
+                            faker.basketball.teams().let { if (it !in this) add(it) }
+                        }
+                    }.map { it.toTitleCase() }.toPersistentList(),
+                "Color names" to List(10) { faker.color.name() }.toSet().toMutableList()
+                    .apply {
+                        while (size != 10) {
+                            faker.color.name().let { if (it !in this) add(it) }
+                        }
+                    }.map { it.toTitleCase() }.toPersistentList(),
+                "Harry Potter spells" to List(10) { faker.harryPotter.spells() }.toSet()
+                    .toMutableList().apply {
+                        while (size != 10) {
+                            faker.harryPotter.spells().let { if (it !in this) add(it) }
+                        }
+                    }.map { it.toTitleCase() }.toPersistentList(),
+                "Sport names" to List(10) { faker.sport.summerOlympics() }.toSet().toMutableList()
+                    .apply {
+                        while (size != 10) {
+                            faker.sport.summerOlympics().let { if (it !in this) add(it) }
+                        }
+                    }.map { it.toTitleCase() }.toPersistentList(),
+                "Minecraft mobs" to List(10) { faker.minecraft.mobs() }.toSet().toMutableList()
+                    .apply {
+                        while (size != 10) {
+                            faker.minecraft.mobs().let { if (it !in this) add(it) }
+                        }
+                    }.map { it.toTitleCase() }.toPersistentList(),
+            )
+        )
+    }
+
     var topic by remember { mutableStateOf(faker.random.randomValue(topicToWords.keys.toList())) }
     var words by remember { mutableStateOf(topicToWords[topic] ?: persistentListOf()) }
 
-    var roundWord by remember { mutableStateOf(faker.random.randomValue(words)) }
+    var roundWord by remember { mutableStateOf("") }
+    var scrambledRoundWord by remember { mutableStateOf("") }
 
     var primaryButtonText by rememberSaveable { mutableStateOf("Start game") }
     var secondaryButtonText by rememberSaveable { mutableStateOf("") }
 
     var guess by rememberSaveable { mutableStateOf("") }
     var isGuessInvalid by remember { mutableStateOf(false) }
+
+    var hasScoredInRound by remember { mutableStateOf(false) }
+    var hasSkippedRound by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
 
@@ -98,79 +146,143 @@ fun UnscrambleGameScreen(modifier: Modifier = Modifier) {
             .verticalScroll(rememberScrollState())
     ) {
         AnimatedVisibility(gameState == GameState.STARTED) {
-            GameTotalScore(totalScore.toString())
+            GameScoreAndTopic(
+                topic = topic,
+                totalScore = totalScore.toString(),
+            )
         }
         Spacer(modifier = Modifier.height(8.dp))
-        GameMainPanel(
-            mainPanel = {
-                when (gameState) {
-                    GameState.NOT_STARTED -> GameNotStartedPanel()
-                    GameState.STARTED -> GameStartedPanel(
-                        round = round.toString(),
-                        roundWord = roundWord,
-                        guess = guess,
-                        isGuessInvalid = isGuessInvalid,
-                        onGuessChanged = { guessValue -> guess = guessValue },
-                        onGuessInputDone = { focusManager.clearFocus() },
-                    )
+        GameMainPanel {
+            when (gameState) {
+                GameState.NOT_STARTED -> GameNotStartedPanel()
+                GameState.STARTED -> GameStartedPanel(
+                    round = round.toString(),
+                    scrambledRoundWord = scrambledRoundWord,
+                    guess = guess,
+                    isGuessInvalid = isGuessInvalid,
+                    onGuessChanged = { guessValue -> guess = guessValue },
+                    onGuessInputDone = { focusManager.clearFocus() },
+                )
 
-                    GameState.FINISHED -> GameFinishedPanel(
-                        totalScore = totalScore.toString(),
-                    )
-                }
-            },
-        )
+                GameState.FINISHED -> GameFinishedPanel(
+                    totalScore = totalScore.toString(),
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(32.dp))
         GamePrimaryButton(
             buttonText = primaryButtonText,
             onClick = {
                 when (gameState) {
+                    // Start game clicked
                     GameState.NOT_STARTED -> {
+                        totalScore = 0
+                        round = 1
+
+                        topic = faker.random.randomValue(topicToWords.keys.toList())
+                        words = topicToWords[topic] ?: persistentListOf()
+
                         roundWord = faker.random.randomValue(words)
+                        scrambledRoundWord = roundWord.scramble()
+
+                        guess = ""
+                        isGuessInvalid = false
+                        hasScoredInRound = false
+                        hasSkippedRound = false
+
+                        primaryButtonText = "Submit"
+                        secondaryButtonText = "Skip"
 
                         gameState = GameState.STARTED
                     }
 
+                    // Submit clicked
                     GameState.STARTED -> {
                         if (guess.isBlank()) {
                             isGuessInvalid = true
+                            hasScoredInRound = false
                         } else {
                             isGuessInvalid = false
+                            hasScoredInRound = guess.lowercase() == roundWord.lowercase()
+                            if (hasScoredInRound) totalScore += 10
 
-                            if (round == 10) {
-                                gameState = GameState.FINISHED
-                            } else {
-                                words = words.filter { word -> word != roundWord }.toPersistentList()
-                                roundWord = faker.random.randomValue(words)
-
+                            if (round != 10) {
                                 round++
+
+                                words =
+                                    words.filter { word -> word != roundWord }.toPersistentList()
+
+                                roundWord = faker.random.randomValue(words)
+                                scrambledRoundWord = roundWord.scramble()
+                            } else {
+                                primaryButtonText = "Restart"
+                                secondaryButtonText = "Quit"
+
+                                gameState = GameState.FINISHED
                             }
+
                             guess = ""
+                            hasSkippedRound = false
                         }
                     }
 
+                    // Restart clicked
                     GameState.FINISHED -> {
+                        totalScore = 0
+                        round = 1
+
                         topic = faker.random.randomValue(topicToWords.keys.toList())
                         words = topicToWords[topic] ?: persistentListOf()
-                        roundWord = faker.random.randomValue(words)
 
-                        round = 1
-                        totalScore = 0
+                        roundWord = faker.random.randomValue(words)
+                        scrambledRoundWord = roundWord.scramble()
+
+                        guess = ""
+                        isGuessInvalid = false
+                        hasScoredInRound = false
+                        hasSkippedRound = false
+
+                        primaryButtonText = "Submit"
+                        secondaryButtonText = "Skip"
 
                         gameState = GameState.STARTED
                     }
                 }
             }
         )
-        AnimatedVisibility(gameState == GameState.STARTED) {
+        AnimatedVisibility(gameState != GameState.NOT_STARTED) {
             GameSecondaryButton(
                 buttonText = secondaryButtonText,
                 onClick = {
-                    if (guess.isBlank()) {
-                        isGuessInvalid = true
-                    } else {
-                        isGuessInvalid = false
+                    // Skip clicked
+                    if (gameState == GameState.STARTED) {
+                        if (round != 10) {
+                            round++
+
+                            words =
+                                words.filter { word -> word != roundWord }.toPersistentList()
+
+                            roundWord = faker.random.randomValue(words)
+                            scrambledRoundWord = roundWord.scramble()
+                        } else {
+                            primaryButtonText = "Restart"
+                            secondaryButtonText = "Quit"
+
+                            gameState = GameState.FINISHED
+                        }
+
                         guess = ""
+                        isGuessInvalid = false
+                        hasScoredInRound = false
+                        hasSkippedRound = true
+                    }
+
+                    // Quit clicked
+                    else if (gameState == GameState.FINISHED) {
+                        primaryButtonText = "Start game"
+                        secondaryButtonText = ""
+
+                        gameState = GameState.NOT_STARTED
                     }
                 }
             )
@@ -179,30 +291,48 @@ fun UnscrambleGameScreen(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun GameTotalScore(
-    currentRoundScore: String,
+private fun GameScoreAndTopic(
+    topic: String,
+    totalScore: String,
     modifier: Modifier = Modifier,
 ) {
-    Text(
-        text = buildAnnotatedString {
-            textSpan("Score: ")
-            textSpan(
-                currentRoundScore.style(
-                    SpanStyle(
-                        fontWeight = FontWeight.Medium,
-                        letterSpacing = 0.5.sp,
+    Row(
+        modifier = modifier,
+    ) {
+        Text(
+            text = buildAnnotatedString {
+                textSpan("Score: ")
+                textSpan(
+                    totalScore.style(
+                        SpanStyle(
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.5.sp,
+                        )
                     )
                 )
-            )
-        },
-        modifier = modifier,
-    )
+            },
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = buildAnnotatedString {
+                textSpan("Topic: ")
+                textSpan(
+                    topic.style(
+                        SpanStyle(
+                            fontWeight = FontWeight.Medium,
+                            letterSpacing = 0.5.sp,
+                        )
+                    )
+                )
+            },
+        )
+    }
 }
 
 @Composable
-fun GameMainPanel(
-    mainPanel: @Composable () -> Unit,
+private fun GameMainPanel(
     modifier: Modifier = Modifier,
+    mainPanel: @Composable () -> Unit,
 ) {
     Card(
         colors = CardDefaults.cardColors(
@@ -220,22 +350,23 @@ fun GameMainPanel(
 }
 
 @Composable
-fun GameNotStartedPanel(
+private fun ColumnScope.GameNotStartedPanel(
     modifier: Modifier = Modifier,
 ) {
     Text(
-        text = "Start a new game from the button below",
-        style = MaterialTheme.typography.bodyLarge,
+        text = "Unscramble Game",
+        style = MaterialTheme.typography.headlineMedium,
         modifier = modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(32.dp)
+            .align(Alignment.CenterHorizontally)
     )
 }
 
 @Composable
-fun GameStartedPanel(
+private fun GameStartedPanel(
     round: String,
-    roundWord: String,
+    scrambledRoundWord: String,
     guess: String,
     isGuessInvalid: Boolean,
     onGuessChanged: (String) -> Unit,
@@ -249,6 +380,7 @@ fun GameStartedPanel(
             .padding(16.dp)
     ) {
         Badge(
+            
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier
@@ -262,7 +394,7 @@ fun GameStartedPanel(
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = roundWord,
+            text = scrambledRoundWord,
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally),
@@ -309,7 +441,7 @@ fun GameStartedPanel(
 }
 
 @Composable
-fun GameFinishedPanel(
+private fun GameFinishedPanel(
     totalScore: String,
     modifier: Modifier = Modifier,
 ) {
@@ -332,7 +464,7 @@ fun GameFinishedPanel(
 }
 
 @Composable
-fun GamePrimaryButton(
+private fun GamePrimaryButton(
     buttonText: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -351,7 +483,7 @@ fun GamePrimaryButton(
 }
 
 @Composable
-fun GameSecondaryButton(
+private fun GameSecondaryButton(
     buttonText: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
