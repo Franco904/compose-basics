@@ -12,6 +12,10 @@ fun AnnotatedString.Builder.textSpan(text: TextWithStyle) {
     withStyle(text.style) { append(text.text) }
 }
 
+fun AnnotatedString.Builder.textSpan(text: String, style: SpanStyle) {
+    withStyle(style) { append(text) }
+}
+
 fun String.style(spanStyle: SpanStyle) = TextWithStyle(
     text = this,
     style = spanStyle,

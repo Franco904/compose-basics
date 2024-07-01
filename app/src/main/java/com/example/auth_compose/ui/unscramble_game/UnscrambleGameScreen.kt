@@ -6,7 +6,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,108 +28,35 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.auth_compose.R
 import com.example.auth_compose.ui.unscramble_game.theme.UnscrambleGameTheme
-import com.example.auth_compose.util.faker
-import com.example.auth_compose.util.scramble
+import com.example.auth_compose.ui.unscramble_game.theme.spanTypography
 import com.example.auth_compose.util.style
 import com.example.auth_compose.util.textSpan
-import com.example.auth_compose.util.toTitleCase
-import kotlinx.collections.immutable.persistentListOf
-import kotlinx.collections.immutable.toPersistentList
-import java.util.Locale
 
 @Composable
-fun UnscrambleGameScreen(modifier: Modifier = Modifier) {
-    var gameState by remember { mutableStateOf(GameState.NOT_STARTED) }
-
-    var totalScore by remember { mutableIntStateOf(0) }
-    var round by remember { mutableIntStateOf(1) }
-
-    val topicToWords by remember {
-        mutableStateOf(
-            mapOf(
-                "Adjectives" to List(10) { faker.adjective.positive() }.toSet().toMutableList()
-                    .apply {
-                        while (size != 10) {
-                            faker.adjective.positive().let { if (it !in this) add(it) }
-                        }
-                    }.map { it.toTitleCase() }.toPersistentList(),
-                "Animal names" to List(10) { faker.animal.name() }.toSet().toMutableList()
-                    .apply {
-                        while (size != 10) {
-                            faker.animal.name().let { if (it !in this) add(it) }
-                        }
-                    }.map { it.toTitleCase() }.toPersistentList(),
-                "Basketball teams" to List(10) { faker.basketball.teams() }.toSet().toMutableList()
-                    .apply {
-                        while (size != 10) {
-                            faker.basketball.teams().let { if (it !in this) add(it) }
-                        }
-                    }.map { it.toTitleCase() }.toPersistentList(),
-                "Color names" to List(10) { faker.color.name() }.toSet().toMutableList()
-                    .apply {
-                        while (size != 10) {
-                            faker.color.name().let { if (it !in this) add(it) }
-                        }
-                    }.map { it.toTitleCase() }.toPersistentList(),
-                "Harry Potter spells" to List(10) { faker.harryPotter.spells() }.toSet()
-                    .toMutableList().apply {
-                        while (size != 10) {
-                            faker.harryPotter.spells().let { if (it !in this) add(it) }
-                        }
-                    }.map { it.toTitleCase() }.toPersistentList(),
-                "Sport names" to List(10) { faker.sport.summerOlympics() }.toSet().toMutableList()
-                    .apply {
-                        while (size != 10) {
-                            faker.sport.summerOlympics().let { if (it !in this) add(it) }
-                        }
-                    }.map { it.toTitleCase() }.toPersistentList(),
-                "Minecraft mobs" to List(10) { faker.minecraft.mobs() }.toSet().toMutableList()
-                    .apply {
-                        while (size != 10) {
-                            faker.minecraft.mobs().let { if (it !in this) add(it) }
-                        }
-                    }.map { it.toTitleCase() }.toPersistentList(),
-            )
-        )
-    }
-
-    var topic by remember { mutableStateOf(faker.random.randomValue(topicToWords.keys.toList())) }
-    var words by remember { mutableStateOf(topicToWords[topic] ?: persistentListOf()) }
-
-    var roundWord by remember { mutableStateOf("") }
-    var scrambledRoundWord by remember { mutableStateOf("") }
-
-    var primaryButtonText by rememberSaveable { mutableStateOf("Start game") }
-    var secondaryButtonText by rememberSaveable { mutableStateOf("") }
-
-    var guess by rememberSaveable { mutableStateOf("") }
-    var isGuessInvalid by remember { mutableStateOf(false) }
-
-    var hasScoredInRound by remember { mutableStateOf(false) }
-    var hasSkippedRound by remember { mutableStateOf(false) }
+fun UnscrambleGameScreen(
+    modifier: Modifier = Modifier,
+    viewModel: UnscrambleGameViewModel = viewModel(),
+) {
+    val gameUiState by viewModel.uiState.collectAsState()
 
     val focusManager = LocalFocusManager.current
 
@@ -145,147 +71,51 @@ fun UnscrambleGameScreen(modifier: Modifier = Modifier) {
             .padding(horizontal = 24.dp, vertical = 32.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        AnimatedVisibility(gameState == GameState.STARTED) {
+        if (gameUiState.gameState == GameState.STARTED) {
             Row {
-                GameTotalScore(totalScore = totalScore.toString())
+                GameTotalScore(totalScore = gameUiState.totalScore.toString())
                 Spacer(modifier = Modifier.weight(1f))
-                GameTopic(topic = topic)
+                GameTopic(
+                    topic = stringResource(
+                        id = gameUiState.topicWords?.topic?.displayName
+                            ?: R.string.unscramble_game_topic_no_topic_set
+                    )
+                )
             }
         }
         Spacer(modifier = Modifier.height(8.dp))
         GameMainPanel {
-            when (gameState) {
+            when (gameUiState.gameState) {
                 GameState.NOT_STARTED -> GameNotStartedPanel()
                 GameState.STARTED -> GameStartedPanel(
-                    round = round.toString(),
-                    scrambledRoundWord = scrambledRoundWord,
-                    guess = guess,
-                    isGuessInvalid = isGuessInvalid,
-                    onGuessChanged = { guessValue -> guess = guessValue },
+                    round = gameUiState.round.toString(),
+                    scrambledRoundWord = gameUiState.scrambledRoundWord,
+                    guess = viewModel.guess,
+                    isGuessValid = viewModel.isGuessValid,
+                    onGuessChanged = viewModel::onGuessChanged,
                     onGuessInputDone = { focusManager.clearFocus() },
                 )
 
                 GameState.FINISHED -> GameFinishedPanel(
-                    totalScore = totalScore.toString(),
+                    totalScore = gameUiState.totalScore.toString(),
                 )
             }
         }
         Spacer(modifier = Modifier.height(32.dp))
         GamePrimaryButton(
-            buttonText = primaryButtonText,
-            onClick = {
-                when (gameState) {
-                    // Start game clicked
-                    GameState.NOT_STARTED -> {
-                        totalScore = 0
-                        round = 1
-
-                        topic = faker.random.randomValue(topicToWords.keys.toList())
-                        words = topicToWords[topic] ?: persistentListOf()
-
-                        roundWord = faker.random.randomValue(words)
-                        scrambledRoundWord = roundWord.scramble()
-
-                        guess = ""
-                        isGuessInvalid = false
-                        hasScoredInRound = false
-                        hasSkippedRound = false
-
-                        primaryButtonText = "Submit"
-                        secondaryButtonText = "Skip"
-
-                        gameState = GameState.STARTED
-                    }
-
-                    // Submit clicked
-                    GameState.STARTED -> {
-                        if (guess.isBlank()) {
-                            isGuessInvalid = true
-                            hasScoredInRound = false
-                        } else {
-                            isGuessInvalid = false
-                            hasScoredInRound = guess.lowercase() == roundWord.lowercase()
-                            if (hasScoredInRound) totalScore += 10
-
-                            if (round != 10) {
-                                round++
-
-                                words =
-                                    words.filter { word -> word != roundWord }.toPersistentList()
-
-                                roundWord = faker.random.randomValue(words)
-                                scrambledRoundWord = roundWord.scramble()
-                            } else {
-                                primaryButtonText = "Restart"
-                                secondaryButtonText = "Quit"
-
-                                gameState = GameState.FINISHED
-                            }
-
-                            guess = ""
-                            hasSkippedRound = false
-                        }
-                    }
-
-                    // Restart clicked
-                    GameState.FINISHED -> {
-                        totalScore = 0
-                        round = 1
-
-                        topic = faker.random.randomValue(topicToWords.keys.toList())
-                        words = topicToWords[topic] ?: persistentListOf()
-
-                        roundWord = faker.random.randomValue(words)
-                        scrambledRoundWord = roundWord.scramble()
-
-                        guess = ""
-                        isGuessInvalid = false
-                        hasScoredInRound = false
-                        hasSkippedRound = false
-
-                        primaryButtonText = "Submit"
-                        secondaryButtonText = "Skip"
-
-                        gameState = GameState.STARTED
-                    }
-                }
-            }
+            buttonText = stringResource(
+                id = gameUiState.primaryButtonText
+                    ?: R.string.unscramble_game_start_game_primary_btn
+            ),
+            onClick = viewModel::onPrimaryButtonClicked,
         )
-        AnimatedVisibility(gameState != GameState.NOT_STARTED) {
+        AnimatedVisibility(gameUiState.gameState != GameState.NOT_STARTED) {
             GameSecondaryButton(
-                buttonText = secondaryButtonText,
-                onClick = {
-                    // Skip clicked
-                    if (gameState == GameState.STARTED) {
-                        if (round != 10) {
-                            round++
-
-                            words =
-                                words.filter { word -> word != roundWord }.toPersistentList()
-
-                            roundWord = faker.random.randomValue(words)
-                            scrambledRoundWord = roundWord.scramble()
-                        } else {
-                            primaryButtonText = "Restart"
-                            secondaryButtonText = "Quit"
-
-                            gameState = GameState.FINISHED
-                        }
-
-                        guess = ""
-                        isGuessInvalid = false
-                        hasScoredInRound = false
-                        hasSkippedRound = true
-                    }
-
-                    // Quit clicked
-                    else if (gameState == GameState.FINISHED) {
-                        primaryButtonText = "Start game"
-                        secondaryButtonText = ""
-
-                        gameState = GameState.NOT_STARTED
-                    }
-                }
+                buttonText = stringResource(
+                    id = gameUiState.secondaryButtonText
+                        ?: R.string.unscramble_game_no_secondary_btn
+                ),
+                onClick = viewModel::onSecondaryButtonClicked,
             )
         }
     }
@@ -298,7 +128,7 @@ private fun GameTotalScore(
 ) {
     Text(
         text = buildAnnotatedString {
-            textSpan("Score: ")
+            textSpan(stringResource(R.string.unscramble_game_score))
             textSpan(
                 totalScore.style(
                     SpanStyle(
@@ -319,7 +149,7 @@ private fun GameTopic(
 ) {
     Text(
         text = buildAnnotatedString {
-            textSpan("Topic: ")
+            textSpan(stringResource(R.string.unscramble_game_topic))
             textSpan(
                 topic.style(
                     SpanStyle(
@@ -354,25 +184,36 @@ private fun GameMainPanel(
 }
 
 @Composable
-private fun ColumnScope.GameNotStartedPanel(
+private fun GameNotStartedPanel(
     modifier: Modifier = Modifier,
 ) {
-    Text(
-        text = "Unscramble Game",
-        style = MaterialTheme.typography.headlineMedium,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxWidth()
             .padding(32.dp)
-            .align(Alignment.CenterHorizontally)
-    )
+    ) {
+        Text(
+            text = buildAnnotatedString {
+                textSpan(
+                    stringResource(R.string.app_owner_text),
+                    style = MaterialTheme.spanTypography.bodyLarge,
+                )
+                textSpan(
+                    stringResource(R.string.unscramble_game_name),
+                    style = MaterialTheme.spanTypography.headlineMedium
+                )
+            },
+        )
+    }
 }
 
 @Composable
 private fun GameStartedPanel(
     round: String,
-    scrambledRoundWord: String,
-    guess: String,
-    isGuessInvalid: Boolean,
+    scrambledRoundWord: String?,
+    guess: String?,
+    isGuessValid: Boolean,
     onGuessChanged: (String) -> Unit,
     onGuessInputDone: KeyboardActionScope.() -> Unit,
     modifier: Modifier = Modifier,
@@ -384,7 +225,6 @@ private fun GameStartedPanel(
             .padding(16.dp)
     ) {
         Badge(
-
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier
@@ -392,27 +232,27 @@ private fun GameStartedPanel(
                 .align(Alignment.End)
         ) {
             Text(
-                text = "$round/10",
+                text = stringResource(R.string.unscramble_game_current_round, round),
                 modifier = Modifier.padding(2.dp),
             )
         }
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = scrambledRoundWord,
+            text = scrambledRoundWord ?: "",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier
                 .align(Alignment.CenterHorizontally),
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Guess the scrambled word!",
+            text = stringResource(R.string.unscramble_guess_the_scrambled_word),
             modifier = Modifier
                 .align(Alignment.CenterHorizontally),
         )
         Spacer(modifier = Modifier.height(16.dp))
         GameGuessTextField(
             guess = guess,
-            isGuessInvalid = isGuessInvalid,
+            isGuessValid = isGuessValid,
             onGuessChanged = onGuessChanged,
             onGuessInputDone = onGuessInputDone,
         )
@@ -421,14 +261,14 @@ private fun GameStartedPanel(
 
 @Composable
 private fun GameGuessTextField(
-    guess: String,
-    isGuessInvalid: Boolean,
+    guess: String?,
+    isGuessValid: Boolean,
     onGuessChanged: (String) -> Unit,
     onGuessInputDone: KeyboardActionScope.() -> Unit,
     modifier: Modifier = Modifier,
 ) {
     OutlinedTextField(
-        value = guess,
+        value = guess ?: "",
         onValueChange = onGuessChanged,
         keyboardActions = KeyboardActions(
             onDone = onGuessInputDone,
@@ -437,8 +277,8 @@ private fun GameGuessTextField(
             keyboardType = KeyboardType.Text,
             imeAction = ImeAction.Done,
         ),
-        isError = isGuessInvalid,
-        placeholder = { Text(text = "Your guess") },
+        isError = !isGuessValid,
+        placeholder = { Text(text = stringResource(R.string.unscramble_your_guess)) },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.background,
             unfocusedContainerColor = MaterialTheme.colorScheme.background,
@@ -446,10 +286,10 @@ private fun GameGuessTextField(
             errorCursorColor = MaterialTheme.colorScheme.error,
         ),
         supportingText = {
-            AnimatedVisibility(isGuessInvalid) {
+            AnimatedVisibility(!isGuessValid) {
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Input your guess before submit",
+                    text = stringResource(R.string.unscramble_input_your_guess_before_submit),
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodySmall,
                 )
@@ -473,7 +313,7 @@ private fun GameFinishedPanel(
             .padding(16.dp)
     ) {
         Text(
-            text = "Your final score:",
+            text = stringResource(R.string.unscramble_your_final_score),
             style = MaterialTheme.typography.bodyLarge,
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -518,12 +358,6 @@ private fun GameSecondaryButton(
     ) {
         Text(text = buttonText)
     }
-}
-
-enum class GameState {
-    NOT_STARTED,
-    STARTED,
-    FINISHED;
 }
 
 @Preview
