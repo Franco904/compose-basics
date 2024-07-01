@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.auth_compose.R
+import com.example.auth_compose.ui.unscramble_game.models.GameState
 import com.example.auth_compose.ui.unscramble_game.theme.UnscrambleGameTheme
 import com.example.auth_compose.ui.unscramble_game.theme.spanTypography
 import com.example.auth_compose.util.style

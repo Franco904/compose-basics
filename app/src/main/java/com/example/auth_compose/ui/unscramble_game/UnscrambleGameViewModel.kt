@@ -6,6 +6,11 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.auth_compose.R
+import com.example.auth_compose.ui.unscramble_game.models.GameState
+import com.example.auth_compose.ui.unscramble_game.models.GameTopic
+import com.example.auth_compose.ui.unscramble_game.models.GameTopicWords
+import com.example.auth_compose.ui.unscramble_game.models.UnscrambleGameUiState
+import com.example.auth_compose.ui.unscramble_game.validators.GuessValidator
 import com.example.auth_compose.util.faker
 import com.example.auth_compose.util.scramble
 import kotlinx.collections.immutable.ImmutableList

@@ -1,4 +1,4 @@
-package com.example.auth_compose.ui.unscramble_game
+package com.example.auth_compose.ui.unscramble_game.models
 
 import androidx.annotation.StringRes
 
