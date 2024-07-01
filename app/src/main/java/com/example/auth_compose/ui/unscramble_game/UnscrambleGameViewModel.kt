@@ -64,7 +64,7 @@ class UnscrambleGameViewModel : ViewModel() {
     }
 
     private fun startGame() {
-        val topicWords = peekRandomTopicAndWords()
+        val topicWords = pickRandomTopicAndWords()
         val roundWord = faker.random.randomValue(topicWords.words)
 
         _uiState.update {
@@ -92,7 +92,7 @@ class UnscrambleGameViewModel : ViewModel() {
         val hasScoredInRound = guess.lowercase() == uiState.value.roundWord?.lowercase()
         val currentTotalScore = uiState.value.totalScore
 
-        val (newRoundWord, newWords) = peekRandomWordForNextRound()
+        val (newRoundWord, newWords) = pickRandomWordForNextRound()
 
         if (uiState.value.round != LAST_ROUND_NUMBER) {
             _uiState.update { currentUiState ->
@@ -129,7 +129,7 @@ class UnscrambleGameViewModel : ViewModel() {
     }
 
     private fun skipWord() {
-        val (newRoundWord, newWords) = peekRandomWordForNextRound()
+        val (newRoundWord, newWords) = pickRandomWordForNextRound()
 
         if (uiState.value.round != LAST_ROUND_NUMBER) {
             _uiState.update { currentUiState ->
@@ -167,11 +167,11 @@ class UnscrambleGameViewModel : ViewModel() {
         }
     }
 
-    private fun peekRandomTopicAndWords() = faker.random.randomValue(
+    private fun pickRandomTopicAndWords() = faker.random.randomValue(
         topicToWords.map { GameTopicWords(it.key, it.value) }.toPersistentList()
     )
 
-    private fun peekRandomWordForNextRound(): Pair<String, ImmutableList<String>> {
+    private fun pickRandomWordForNextRound(): Pair<String, ImmutableList<String>> {
         val currentWords = uiState.value.topicWords?.words ?: persistentListOf()
         val currentRoundWord = uiState.value.roundWord
 
