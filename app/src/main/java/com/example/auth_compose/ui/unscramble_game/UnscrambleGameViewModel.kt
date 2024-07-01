@@ -50,6 +50,10 @@ class UnscrambleGameViewModel : ViewModel() {
         guess = newGuess
     }
 
+    fun onGuessFieldFocusChanged(isFocused: Boolean) {
+        isGuessValid = if (isFocused) true else GuessValidator.isValid(guess)
+    }
+
     fun onPrimaryButtonClicked() {
         when (_uiState.value.gameState) {
             GameState.NOT_STARTED -> startGame()
