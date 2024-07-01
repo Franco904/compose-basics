@@ -18,6 +18,7 @@ import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class UnscrambleGameViewModel : ViewModel() {
@@ -66,18 +67,20 @@ class UnscrambleGameViewModel : ViewModel() {
         val topicWords = peekRandomTopicAndWords()
         val roundWord = faker.random.randomValue(topicWords.words)
 
-        _uiState.value = UnscrambleGameUiState(
-            gameState = GameState.STARTED,
-            topicWords = topicWords,
-            totalScore = 0,
-            round = 1,
-            roundWord = roundWord,
-            scrambledRoundWord = roundWord.scramble(),
-            hasScoredInRound = false,
-            hasSkippedRound = false,
-            primaryButtonText = R.string.unscramble_game_submit_primary_btn,
-            secondaryButtonText = R.string.unscramble_game_skip_secondary_btn,
-        )
+        _uiState.update {
+            UnscrambleGameUiState(
+                gameState = GameState.STARTED,
+                topicWords = topicWords,
+                totalScore = 0,
+                round = 1,
+                roundWord = roundWord,
+                scrambledRoundWord = roundWord.scramble(),
+                hasScoredInRound = false,
+                hasSkippedRound = false,
+                primaryButtonText = R.string.unscramble_game_submit_primary_btn,
+                secondaryButtonText = R.string.unscramble_game_skip_secondary_btn,
+            )
+        }
 
         resetGuessState()
     }
@@ -92,21 +95,25 @@ class UnscrambleGameViewModel : ViewModel() {
         val (newRoundWord, newWords) = peekRandomWordForNextRound()
 
         if (uiState.value.round != LAST_ROUND_NUMBER) {
-            _uiState.value = uiState.value.copyWith(
-                topicWords = uiState.value.topicWords?.copyWith(words = newWords),
-                totalScore = if (hasScoredInRound) currentTotalScore + 10 else currentTotalScore,
-                round = uiState.value.round + 1,
-                roundWord = newRoundWord,
-                scrambledRoundWord = newRoundWord.scramble(),
-                hasSkippedRound = false,
-            )
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    topicWords = uiState.value.topicWords?.copyWith(words = newWords),
+                    totalScore = if (hasScoredInRound) currentTotalScore + 10 else currentTotalScore,
+                    round = uiState.value.round + 1,
+                    roundWord = newRoundWord,
+                    scrambledRoundWord = newRoundWord.scramble(),
+                    hasSkippedRound = false,
+                )
+            }
         } else {
-            _uiState.value = uiState.value.copyWith(
-                gameState = GameState.FINISHED,
-                hasSkippedRound = false,
-                primaryButtonText = R.string.unscramble_game_restart_primary_btn,
-                secondaryButtonText = R.string.unscramble_game_quit_secondary_btn,
-            )
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    gameState = GameState.FINISHED,
+                    hasSkippedRound = false,
+                    primaryButtonText = R.string.unscramble_game_restart_primary_btn,
+                    secondaryButtonText = R.string.unscramble_game_quit_secondary_btn,
+                )
+            }
         }
 
         resetGuessState()
@@ -125,33 +132,39 @@ class UnscrambleGameViewModel : ViewModel() {
         val (newRoundWord, newWords) = peekRandomWordForNextRound()
 
         if (uiState.value.round != LAST_ROUND_NUMBER) {
-            _uiState.value = uiState.value.copyWith(
-                topicWords = uiState.value.topicWords?.copyWith(words = newWords),
-                round = uiState.value.round + 1,
-                roundWord = newRoundWord,
-                scrambledRoundWord = newRoundWord.scramble(),
-                hasScoredInRound = false,
-                hasSkippedRound = true,
-            )
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    topicWords = uiState.value.topicWords?.copyWith(words = newWords),
+                    round = uiState.value.round + 1,
+                    roundWord = newRoundWord,
+                    scrambledRoundWord = newRoundWord.scramble(),
+                    hasScoredInRound = false,
+                    hasSkippedRound = true,
+                )
+            }
         } else {
-            _uiState.value = uiState.value.copyWith(
-                gameState = GameState.FINISHED,
-                hasScoredInRound = false,
-                hasSkippedRound = true,
-                primaryButtonText = R.string.unscramble_game_restart_primary_btn,
-                secondaryButtonText = R.string.unscramble_game_quit_secondary_btn,
-            )
+            _uiState.update { currentUiState ->
+                currentUiState.copy(
+                    gameState = GameState.FINISHED,
+                    hasScoredInRound = false,
+                    hasSkippedRound = true,
+                    primaryButtonText = R.string.unscramble_game_restart_primary_btn,
+                    secondaryButtonText = R.string.unscramble_game_quit_secondary_btn,
+                )
+            }
         }
 
         resetGuessState()
     }
 
     private fun quitGame() {
-        _uiState.value = uiState.value.copyWith(
-            gameState = GameState.NOT_STARTED,
-            primaryButtonText = R.string.unscramble_game_start_game_primary_btn,
-            secondaryButtonText = R.string.unscramble_game_no_secondary_btn,
-        )
+        _uiState.update { currentUiState ->
+            currentUiState.copy(
+                gameState = GameState.NOT_STARTED,
+                primaryButtonText = R.string.unscramble_game_start_game_primary_btn,
+                secondaryButtonText = R.string.unscramble_game_no_secondary_btn,
+            )
+        }
     }
 
     private fun peekRandomTopicAndWords() = faker.random.randomValue(

@@ -15,28 +15,4 @@ data class UnscrambleGameUiState(
     val primaryButtonText: Int? = null,
     @StringRes
     val secondaryButtonText: Int? = null,
-) {
-    fun copyWith(
-        gameState: GameState? = null,
-        topicWords: GameTopicWords? = null,
-        totalScore: Int? = null,
-        round: Int? = null,
-        roundWord: String? = null,
-        scrambledRoundWord: String? = null,
-        hasScoredInRound: Boolean? = null,
-        hasSkippedRound: Boolean? = null,
-        primaryButtonText: Int? = null,
-        secondaryButtonText: Int? = null,
-    ) = UnscrambleGameUiState(
-        gameState = gameState ?: this.gameState,
-        topicWords = topicWords ?: this.topicWords,
-        totalScore = totalScore ?: this.totalScore,
-        round = round ?: this.round,
-        roundWord = roundWord ?: this.roundWord,
-        scrambledRoundWord = scrambledRoundWord ?: this.scrambledRoundWord,
-        hasScoredInRound = hasScoredInRound ?: this.hasScoredInRound,
-        hasSkippedRound = hasSkippedRound ?: this.hasSkippedRound,
-        primaryButtonText = primaryButtonText ?: this.primaryButtonText,
-        secondaryButtonText = secondaryButtonText ?: this.secondaryButtonText,
-    )
-}
+)
