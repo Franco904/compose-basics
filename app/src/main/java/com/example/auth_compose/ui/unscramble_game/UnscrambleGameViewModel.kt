@@ -3,6 +3,7 @@ package com.example.auth_compose.ui.unscramble_game
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.auth_compose.R
@@ -17,13 +18,15 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class UnscrambleGameViewModel : ViewModel() {
-    private val _uiState = MutableStateFlow(UnscrambleGameUiState())
-    val uiState = _uiState.asStateFlow()
+class UnscrambleGameViewModel(
+    private val savedStateHandle: SavedStateHandle,
+) : ViewModel() {
+    val uiState = savedStateHandle.getStoredStateFlow(UI_STATE_KEY, UnscrambleGameUiState())
 
     var guess by mutableStateOf("")
         private set
@@ -33,7 +36,7 @@ class UnscrambleGameViewModel : ViewModel() {
 
     private lateinit var topicToWords: Map<GameTopic, ImmutableList<String>>
 
-    init {
+    fun init() {
         viewModelScope.launch {
             topicToWords = mapOf(
                 GameTopic.ADJECTIVES to GameTopic.ADJECTIVES.getWords(),
@@ -56,7 +59,7 @@ class UnscrambleGameViewModel : ViewModel() {
     }
 
     fun onPrimaryButtonClicked() {
-        when (_uiState.value.gameState) {
+        when (uiState.value.gameState) {
             GameState.NOT_STARTED -> startGame()
             GameState.STARTED -> submitGuess()
             GameState.FINISHED -> restartGame()
@@ -67,7 +70,7 @@ class UnscrambleGameViewModel : ViewModel() {
         val topicWords = pickRandomTopicAndWords()
         val roundWord = faker.random.randomValue(topicWords.words)
 
-        _uiState.update {
+        savedStateHandle.updateStateFlow(UI_STATE_KEY, uiState) {
             UnscrambleGameUiState(
                 gameState = GameState.STARTED,
                 topicWords = topicWords,
@@ -95,7 +98,7 @@ class UnscrambleGameViewModel : ViewModel() {
         val (newRoundWord, newWords) = pickRandomWordForNextRound()
 
         if (uiState.value.round != LAST_ROUND_NUMBER) {
-            _uiState.update { currentUiState ->
+            savedStateHandle.updateStateFlow(UI_STATE_KEY, uiState) { currentUiState ->
                 currentUiState.copy(
                     topicWords = uiState.value.topicWords?.copyWith(words = newWords),
                     totalScore = if (hasScoredInRound) currentTotalScore + 10 else currentTotalScore,
@@ -106,7 +109,7 @@ class UnscrambleGameViewModel : ViewModel() {
                 )
             }
         } else {
-            _uiState.update { currentUiState ->
+            savedStateHandle.updateStateFlow(UI_STATE_KEY, uiState) { currentUiState ->
                 currentUiState.copy(
                     gameState = GameState.FINISHED,
                     hasSkippedRound = false,
@@ -120,7 +123,7 @@ class UnscrambleGameViewModel : ViewModel() {
     fun restartGame() = startGame()
 
     fun onSecondaryButtonClicked() {
-        val gameState = _uiState.value.gameState
+        val gameState = uiState.value.gameState
 
         if (gameState == GameState.STARTED) skipWord()
     }
@@ -129,7 +132,7 @@ class UnscrambleGameViewModel : ViewModel() {
         val (newRoundWord, newWords) = pickRandomWordForNextRound()
 
         if (uiState.value.round != LAST_ROUND_NUMBER) {
-            _uiState.update { currentUiState ->
+            savedStateHandle.updateStateFlow(UI_STATE_KEY, uiState) { currentUiState ->
                 currentUiState.copy(
                     topicWords = uiState.value.topicWords?.copyWith(words = newWords),
                     round = uiState.value.round + 1,
@@ -140,7 +143,7 @@ class UnscrambleGameViewModel : ViewModel() {
                 )
             }
         } else {
-            _uiState.update { currentUiState ->
+            savedStateHandle.updateStateFlow(UI_STATE_KEY, uiState) { currentUiState ->
                 currentUiState.copy(
                     gameState = GameState.FINISHED,
                     hasScoredInRound = false,
@@ -153,7 +156,7 @@ class UnscrambleGameViewModel : ViewModel() {
     }
 
     fun quitGame() {
-        _uiState.update { currentUiState ->
+        savedStateHandle.updateStateFlow(UI_STATE_KEY, uiState) { currentUiState ->
             currentUiState.copy(
                 gameState = GameState.NOT_STARTED,
                 primaryButtonText = R.string.unscramble_game_start_game_primary_btn,
@@ -182,6 +185,17 @@ class UnscrambleGameViewModel : ViewModel() {
     }
 
     companion object {
+        private const val UI_STATE_KEY = "uiState"
         private const val LAST_ROUND_NUMBER = 10
+    }
+}
+
+fun <T> SavedStateHandle.getStoredStateFlow(key: String, defaultValue: T) = getStateFlow(key, defaultValue)
+
+fun <T> SavedStateHandle.updateStateFlow(key: String, stateFlow: StateFlow<T>, function: (T) -> T) {
+    synchronized(stateFlow) {
+        val prevValue = stateFlow.value
+        val nextValue = function(prevValue)
+        this[key] = nextValue
     }
 }

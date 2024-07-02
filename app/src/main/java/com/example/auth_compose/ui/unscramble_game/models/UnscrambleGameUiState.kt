@@ -1,7 +1,10 @@
 package com.example.auth_compose.ui.unscramble_game.models
 
+import android.os.Parcelable
 import androidx.annotation.StringRes
+import kotlinx.parcelize.Parcelize
 
+@Parcelize
 data class UnscrambleGameUiState(
     val gameState: GameState = GameState.NOT_STARTED,
     val topicWords: GameTopicWords? = null,
@@ -15,4 +18,4 @@ data class UnscrambleGameUiState(
     val primaryButtonText: Int? = null,
     @StringRes
     val secondaryButtonText: Int? = null,
-)
+) : Parcelable

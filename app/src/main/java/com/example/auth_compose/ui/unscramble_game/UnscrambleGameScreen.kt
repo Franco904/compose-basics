@@ -51,6 +51,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.auth_compose.R
 import com.example.auth_compose.ui.unscramble_game.models.GameState
@@ -62,9 +63,9 @@ import com.example.auth_compose.util.textSpan
 @Composable
 fun UnscrambleGameScreen(
     modifier: Modifier = Modifier,
-    viewModel: UnscrambleGameViewModel = viewModel(),
+    viewModel: UnscrambleGameViewModel = viewModel<UnscrambleGameViewModel>().apply { init() },
 ) {
-    val gameUiState by viewModel.uiState.collectAsState()
+    val gameUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     val focusManager = LocalFocusManager.current
 
