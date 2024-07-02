@@ -110,8 +110,6 @@ class UnscrambleGameViewModel : ViewModel() {
                 currentUiState.copy(
                     gameState = GameState.FINISHED,
                     hasSkippedRound = false,
-                    primaryButtonText = R.string.unscramble_game_restart_primary_btn,
-                    secondaryButtonText = R.string.unscramble_game_quit_secondary_btn,
                 )
             }
         }
@@ -119,13 +117,12 @@ class UnscrambleGameViewModel : ViewModel() {
         resetGuessState()
     }
 
-    private fun restartGame() = startGame()
+    fun restartGame() = startGame()
 
     fun onSecondaryButtonClicked() {
         val gameState = _uiState.value.gameState
 
         if (gameState == GameState.STARTED) skipWord()
-        else if (gameState == GameState.FINISHED) quitGame()
     }
 
     private fun skipWord() {
@@ -148,8 +145,6 @@ class UnscrambleGameViewModel : ViewModel() {
                     gameState = GameState.FINISHED,
                     hasScoredInRound = false,
                     hasSkippedRound = true,
-                    primaryButtonText = R.string.unscramble_game_restart_primary_btn,
-                    secondaryButtonText = R.string.unscramble_game_quit_secondary_btn,
                 )
             }
         }
@@ -157,7 +152,7 @@ class UnscrambleGameViewModel : ViewModel() {
         resetGuessState()
     }
 
-    private fun quitGame() {
+    fun quitGame() {
         _uiState.update { currentUiState ->
             currentUiState.copy(
                 gameState = GameState.NOT_STARTED,

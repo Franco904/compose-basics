@@ -17,6 +17,7 @@ import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -26,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,12 +35,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
@@ -79,7 +79,7 @@ fun UnscrambleGameScreen(
             .padding(horizontal = 24.dp, vertical = 32.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        if (gameUiState.gameState == GameState.STARTED) {
+        if (gameUiState.gameState != GameState.NOT_STARTED) {
             Row {
                 GameTotalScore(totalScore = gameUiState.totalScore.toString())
                 Spacer(modifier = Modifier.weight(1f))
@@ -93,23 +93,22 @@ fun UnscrambleGameScreen(
         }
         Spacer(modifier = Modifier.height(8.dp))
         GameMainPanel {
-            when (gameUiState.gameState) {
-                GameState.NOT_STARTED -> GameNotStartedPanel()
-                GameState.STARTED -> GameStartedPanel(
-                    round = gameUiState.round.toString(),
-                    scrambledRoundWord = gameUiState.scrambledRoundWord,
-                    guess = viewModel.guess,
-                    isGuessValid = viewModel.isGuessValid,
-                    onGuessChanged = viewModel::onGuessChanged,
-                    onGuessInputDone = { focusManager.clearFocus() },
-                    onFocusChanged = viewModel::onGuessFieldFocusChanged,
-                )
-
-                GameState.FINISHED -> GameFinishedPanel(
-                    totalScore = gameUiState.totalScore.toString(),
-                )
-            }
+            if (gameUiState.gameState == GameState.NOT_STARTED) GameNotStartedPanel()
+            else GameStartedPanel(
+                round = gameUiState.round.toString(),
+                scrambledRoundWord = gameUiState.scrambledRoundWord,
+                guess = viewModel.guess,
+                isGuessValid = viewModel.isGuessValid,
+                onGuessChanged = viewModel::onGuessChanged,
+                onGuessInputDone = { focusManager.clearFocus() },
+                onFocusChanged = viewModel::onGuessFieldFocusChanged,
+            )
         }
+        if (gameUiState.gameState == GameState.FINISHED) GameFinishedScoreDialog(
+            totalScore = gameUiState.totalScore,
+            onRestartGame = viewModel::restartGame,
+            onQuitGame = viewModel::quitGame,
+        )
         Spacer(modifier = Modifier.height(32.dp))
         GamePrimaryButton(
             buttonText = stringResource(
@@ -327,26 +326,50 @@ private fun GameGuessTextField(
 }
 
 @Composable
-private fun GameFinishedPanel(
-    totalScore: String,
+private fun GameFinishedScoreDialog(
+    totalScore: Int,
+    onRestartGame: () -> Unit,
+    onQuitGame: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    AlertDialog(
+        onDismissRequest = {},
+        title = {
+            Text(
+                text = if (totalScore >= 80) "Congratulations!" else "Game over",
+                style = MaterialTheme.typography.headlineMedium,
+            )
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text(
+                    text = stringResource(R.string.unscramble_your_final_score),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = totalScore.toString(),
+                    style = MaterialTheme.typography.headlineMedium,
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onQuitGame) {
+                Text(text = "Quit")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onRestartGame) {
+                Text(text = "Restart")
+            }
+        },
         modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-    ) {
-        Text(
-            text = stringResource(R.string.unscramble_your_final_score),
-            style = MaterialTheme.typography.bodyLarge,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = totalScore,
-            style = MaterialTheme.typography.headlineMedium,
-        )
-    }
+    )
 }
 
 @Composable
