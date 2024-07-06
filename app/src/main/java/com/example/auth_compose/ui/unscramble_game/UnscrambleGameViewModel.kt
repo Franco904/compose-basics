@@ -20,7 +20,6 @@ import kotlinx.collections.immutable.toPersistentList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class UnscrambleGameViewModel(
@@ -60,14 +59,40 @@ class UnscrambleGameViewModel(
 
     fun onPrimaryButtonClicked() {
         when (uiState.value.gameState) {
-            GameState.NOT_STARTED -> startGame()
+            GameState.NOT_STARTED -> initTopicSelection()
+            GameState.TOPIC_SELECTION -> {}
             GameState.STARTED -> submitGuess()
             GameState.FINISHED -> restartGame()
         }
     }
 
-    private fun startGame() {
-        val topicWords = pickRandomTopicAndWords()
+    private fun initTopicSelection() {
+        savedStateHandle.updateStateFlow(UI_STATE_KEY, uiState) { currentUiState ->
+            currentUiState.copy(
+                gameState = GameState.TOPIC_SELECTION,
+                topicWords = null,
+            )
+        }
+    }
+
+    fun onCancelTopicSelection() {
+        savedStateHandle.updateStateFlow(UI_STATE_KEY, uiState) { currentUiState ->
+            currentUiState.copy(gameState = GameState.NOT_STARTED)
+        }
+    }
+
+    fun onTopicSelected(selectedTopicDisplayName: Int?) {
+        val topicWords = topicToWords.entries.find { it.key.displayName == selectedTopicDisplayName }
+
+        if (topicWords == null) {
+            onCancelTopicSelection()
+            return
+        }
+
+        startGame(GameTopicWords(topicWords.key, topicWords.value))
+    }
+
+    private fun startGame(topicWords: GameTopicWords) {
         val roundWord = faker.random.randomValue(topicWords.words)
 
         savedStateHandle.updateStateFlow(UI_STATE_KEY, uiState) {
@@ -120,7 +145,7 @@ class UnscrambleGameViewModel(
         resetGuessState()
     }
 
-    fun restartGame() = startGame()
+    fun restartGame() = initTopicSelection()
 
     fun onSecondaryButtonClicked() {
         val gameState = uiState.value.gameState

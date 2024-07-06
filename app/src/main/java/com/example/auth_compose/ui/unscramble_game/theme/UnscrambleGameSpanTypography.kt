@@ -5,10 +5,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
 data class SpanTypography(
+    val headlineSmall: SpanStyle = SpanStyle(
+        fontWeight = FontWeight.W600,
+        fontSize = 24.sp,
+        letterSpacing = 0.5.sp,
+    ),
     val headlineMedium: SpanStyle = SpanStyle(
         fontWeight = FontWeight.W600,
         fontSize = 28.sp,

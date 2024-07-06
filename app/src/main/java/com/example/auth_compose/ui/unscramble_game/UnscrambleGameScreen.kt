@@ -17,7 +17,6 @@ import androidx.compose.foundation.text.KeyboardActionScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Badge
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -27,11 +26,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,10 +52,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.auth_compose.R
 import com.example.auth_compose.ui.unscramble_game.models.GameState
+import com.example.auth_compose.ui.unscramble_game.models.GameTopic
+import com.example.auth_compose.ui.unscramble_game.overlays.GameFinishedScoreDialog
+import com.example.auth_compose.ui.unscramble_game.overlays.GameTopicSelectionDialog
 import com.example.auth_compose.ui.unscramble_game.theme.UnscrambleGameTheme
 import com.example.auth_compose.ui.unscramble_game.theme.spanTypography
 import com.example.auth_compose.util.style
 import com.example.auth_compose.util.textSpan
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toPersistentList
 
 @Composable
 fun UnscrambleGameScreen(
@@ -80,21 +82,25 @@ fun UnscrambleGameScreen(
             .padding(horizontal = 24.dp, vertical = 32.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        if (gameUiState.gameState != GameState.NOT_STARTED) {
+        val isStartedOrFinishedState = gameUiState.gameState in persistentListOf(GameState.STARTED, GameState.FINISHED)
+
+        if (isStartedOrFinishedState) {
             Row {
-                GameTotalScore(totalScore = gameUiState.totalScore.toString())
+                GameTotalScoreSection(totalScore = gameUiState.totalScore.toString())
                 Spacer(modifier = Modifier.weight(1f))
-                GameTopic(
+                GameTopicSection(
                     topic = stringResource(
                         id = gameUiState.topicWords?.topic?.displayName
                             ?: R.string.unscramble_game_topic_no_topic_set
                     )
                 )
             }
+            Spacer(modifier = Modifier.height(8.dp))
         }
-        Spacer(modifier = Modifier.height(8.dp))
         GameMainPanel {
-            if (gameUiState.gameState == GameState.NOT_STARTED) GameNotStartedPanel()
+            val isNotStartedOrTopicSelectionState = gameUiState.gameState in persistentListOf(GameState.NOT_STARTED, GameState.TOPIC_SELECTION)
+
+            if (isNotStartedOrTopicSelectionState) GameNotStartedPanel()
             else GameStartedPanel(
                 round = gameUiState.round.toString(),
                 scrambledRoundWord = gameUiState.scrambledRoundWord,
@@ -105,11 +111,6 @@ fun UnscrambleGameScreen(
                 onFocusChanged = viewModel::onGuessFieldFocusChanged,
             )
         }
-        if (gameUiState.gameState == GameState.FINISHED) GameFinishedScoreDialog(
-            totalScore = gameUiState.totalScore,
-            onRestartGame = viewModel::restartGame,
-            onQuitGame = viewModel::quitGame,
-        )
         Spacer(modifier = Modifier.height(32.dp))
         GamePrimaryButton(
             buttonText = stringResource(
@@ -118,7 +119,7 @@ fun UnscrambleGameScreen(
             ),
             onClick = viewModel::onPrimaryButtonClicked,
         )
-        AnimatedVisibility(gameUiState.gameState != GameState.NOT_STARTED) {
+        AnimatedVisibility(isStartedOrFinishedState) {
             GameSecondaryButton(
                 buttonText = stringResource(
                     id = gameUiState.secondaryButtonText
@@ -127,11 +128,24 @@ fun UnscrambleGameScreen(
                 onClick = viewModel::onSecondaryButtonClicked,
             )
         }
+        if (gameUiState.gameState == GameState.TOPIC_SELECTION) {
+            GameTopicSelectionDialog(
+                topics = GameTopic.entries.map { it.displayName }.toPersistentList(),
+                onCancel = viewModel::onCancelTopicSelection,
+                onStart = viewModel::onTopicSelected,
+            )
+        } else if (gameUiState.gameState == GameState.FINISHED) {
+            GameFinishedScoreDialog(
+                totalScore = gameUiState.totalScore,
+                onRestartGame = viewModel::restartGame,
+                onQuitGame = viewModel::quitGame,
+            )
+        }
     }
 }
 
 @Composable
-private fun GameTotalScore(
+private fun GameTotalScoreSection(
     totalScore: String,
     modifier: Modifier = Modifier,
 ) {
@@ -152,7 +166,7 @@ private fun GameTotalScore(
 }
 
 @Composable
-private fun GameTopic(
+private fun GameTopicSection(
     topic: String,
     modifier: Modifier = Modifier,
 ) {
@@ -244,7 +258,7 @@ private fun GameStartedPanel(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier
-                .clip(MaterialTheme.shapes.small)
+                .clip(MaterialTheme.shapes.extraSmall)
                 .align(Alignment.End)
         ) {
             Text(
@@ -327,53 +341,6 @@ private fun GameGuessTextField(
 }
 
 @Composable
-private fun GameFinishedScoreDialog(
-    totalScore: Int,
-    onRestartGame: () -> Unit,
-    onQuitGame: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    AlertDialog(
-        onDismissRequest = {},
-        title = {
-            Text(
-                text = if (totalScore >= 80) "Congratulations!" else "Game over",
-                style = MaterialTheme.typography.headlineMedium,
-            )
-        },
-        text = {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.unscramble_your_final_score),
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = totalScore.toString(),
-                    style = MaterialTheme.typography.headlineMedium,
-                )
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onQuitGame) {
-                Text(text = "Quit")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onRestartGame) {
-                Text(text = "Restart")
-            }
-        },
-        modifier = modifier
-    )
-}
-
-@Composable
 private fun GamePrimaryButton(
     buttonText: String,
     onClick: () -> Unit,
@@ -413,6 +380,10 @@ private fun GameSecondaryButton(
 @Composable
 fun UnscrambleGameUiPreview() {
     UnscrambleGameTheme {
-        UnscrambleGameScreen()
+        GameTopicSelectionDialog(
+            topics = GameTopic.entries.map { it.displayName }.toPersistentList(),
+            onCancel = {},
+            onStart = {},
+        )
     }
 }
